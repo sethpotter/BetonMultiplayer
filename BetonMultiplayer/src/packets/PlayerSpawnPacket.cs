@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BetonMultiplayer
 {
-    public class PlayerSpawnPacket : Packet, IReadablePacket
+    public class PlayerSpawnPacket : Packet
     {
         public string playerName;
 

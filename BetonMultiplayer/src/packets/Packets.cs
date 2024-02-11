@@ -5,7 +5,8 @@ namespace BetonMultiplayer
     public enum PacketType
     {
         PlayerSpawnPacket = 0,
-        PlayerMovePacket = 1
+        PlayerMovePacket = 1,
+        PlayerColorPacket = 2
     }
 
     public class Packets
@@ -14,12 +15,10 @@ namespace BetonMultiplayer
         {
             switch (type)
             {
-                case PacketType.PlayerSpawnPacket:
-                    return new PlayerSpawnPacket(bytes);
-                case PacketType.PlayerMovePacket:
-                    return new PlayerMovePacket(bytes);
-                default:
-                    return null;
+                case PacketType.PlayerSpawnPacket: return new PlayerSpawnPacket(bytes);
+                case PacketType.PlayerMovePacket: return new PlayerMovePacket(bytes);
+                case PacketType.PlayerColorPacket: return new PlayerColorPacket(bytes);
+                default: return null;
             }
         }
     }
