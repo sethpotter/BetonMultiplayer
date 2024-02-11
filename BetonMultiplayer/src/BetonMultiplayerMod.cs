@@ -15,6 +15,7 @@ namespace BetonMultiplayer
         private bool drawMultiplayerMenu = false;
         private string ipAddress = "127.0.0.1";
         private string port = "8211";
+        private string color = "1.0,1.0,1.0";
 
         public static List<Player> players = new List<Player>();
 
@@ -74,7 +75,7 @@ namespace BetonMultiplayer
         {
             if(!drawMultiplayerMenu) return;
 
-            GUI.Box(new Rect(0, 25, 150, 100), "");
+            GUI.Box(new Rect(0, 25, 150, 125), "");
 
             // If Client Connected
             if (Network.Client != null && Network.Client.Connected)
@@ -128,6 +129,23 @@ namespace BetonMultiplayer
                     {
                         Network.Close();
                     }
+                }
+            }
+
+            color = GUI.TextField(new Rect(5, 116, 140, 25), color);
+            UnityEngine.Color? col = MiscUtil.floatStringToColor(color);
+            if (col.HasValue)
+            {
+                gameModeManager.player.GetComponentInChildren<Light>().color = col.Value;
+                PlayerColorPacket playerColorPacket = new PlayerColorPacket(new Player(SteamClient.Name), col.Value);
+                
+                if(Network.host)
+                {
+                    Network.ServerBroadcastPacket(playerColorPacket, 99999999);
+                }
+                else
+                {
+                    Network.SendPacketToSocketServer(playerColorPacket);
                 }
             }
         }

@@ -19,8 +19,8 @@ namespace BetonMultiplayer
         public override void OnConnected(Connection connection, ConnectionInfo data)
         {
             base.OnConnected(connection, data);
-            ServerEvents.OnJoin(connection);
             Debug.Log($"Server: Joined {data.Identity}");
+            ServerEvents.OnJoin(connection);
         }
 
         public override void OnDisconnected(Connection connection, ConnectionInfo data)
@@ -183,6 +183,7 @@ namespace BetonMultiplayer
         // BOTH?
         public Result SendPacketToConnection(Packet packet, Connection connection)
         {
+            packet.Encode();
             byte[] bytes = packet.data;
             byte[] type = NetworkUtil.EncodeIntToBytes((int)packet.type);
             byte[] prepend = new byte[type.Length + bytes.Length];
@@ -203,8 +204,6 @@ namespace BetonMultiplayer
         {
             if (host)
                 return false;
-
-            packet.Encode();
 
             try
             {

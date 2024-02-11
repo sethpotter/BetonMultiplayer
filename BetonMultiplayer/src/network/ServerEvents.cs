@@ -11,7 +11,7 @@ namespace BetonMultiplayer
         {
             if (packet is PlayerMovePacket playerMovePacket)
             {
-                playerMovePacket.player.Move(playerMovePacket.position, playerMovePacket.rotation);
+                playerMovePacket.player?.Move(playerMovePacket.position, playerMovePacket.rotation);
             }
         }
 
@@ -23,6 +23,17 @@ namespace BetonMultiplayer
                 BetonMultiplayerMod.players.Add(player);
                 player.Init();
                 Debug.Log("Added Player! " + player.name);
+            }
+        }
+
+        public static void ProcessChangeColor(uint sender, Packet packet)
+        {
+            if (packet is PlayerColorPacket playerColorPacket)
+            {
+                if (playerColorPacket.player != null)
+                {
+                    playerColorPacket.player.body.GetComponentInChildren<Light>().color = playerColorPacket.color;
+                }
             }
         }
 

@@ -395,10 +395,12 @@
     <Compile Include="src\network\ServerEvents.cs" />
     <Compile Include="src\packets\Packet.cs" />
     <Compile Include="src\packets\Packets.cs" />
+    <Compile Include="src\packets\PlayerColorPacket.cs" />
     <Compile Include="src\packets\PlayerMovePacket.cs" />
     <Compile Include="src\packets\PlayerSpawnPacket.cs" />
     <Compile Include="src\packets\IReadablePacket.cs" />
     <Compile Include="src\Player.cs" />
+    <Compile Include="src\util\MiscUtil.cs" />
     <Compile Include="src\util\NetworkUtil.cs" />
     <Compile Include="src\util\PacketUtil.cs" />
   </ItemGroup>

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BetonMultiplayer
 {
-    public class PlayerMovePacket : Packet, IReadablePacket
+    public class PlayerMovePacket : Packet
     {
         public Player player;
         public Vector3 position;
@@ -48,7 +48,7 @@ namespace BetonMultiplayer
 
         private string SerializeVector3(Vector3 vector)
         {
-            return position.x + "," + position.y + "," + position.z;
+            return vector.x + "," + vector.y + "," + vector.z;
         }
 
         private Vector3 DeserializeVector3(string vector)

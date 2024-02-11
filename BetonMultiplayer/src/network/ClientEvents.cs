@@ -10,7 +10,7 @@ namespace BetonMultiplayer
         {
             if (packet is PlayerMovePacket playerMovePacket)
             {
-                playerMovePacket.player.Move(playerMovePacket.position, playerMovePacket.rotation);
+                playerMovePacket.player?.Move(playerMovePacket.position, playerMovePacket.rotation);
             }
         }
 
@@ -25,6 +25,17 @@ namespace BetonMultiplayer
             }
         }
 
+        public static void ProcessChangeColor(uint sender, Packet packet)
+        {
+            if (packet is PlayerColorPacket playerColorPacket)
+            {
+                if (playerColorPacket.player != null)
+                {
+                    playerColorPacket.player.body.GetComponentInChildren<Light>().color = playerColorPacket.color;
+                }
+            }
+        }
+
         public static void AddPacketListeners()
         {
             BetonMultiplayerMod.Network.ClientBus.Register(PacketType.PlayerSpawnPacket, ProcessAddGhost);
@@ -33,7 +44,7 @@ namespace BetonMultiplayer
 
         public static void OnJoin(ConnectionInfo info)
         {
-            Debug.Log("OnJoin-" + SteamClient.Name);
+            Debug.Log("Client-OnJoin-" + SteamClient.Name);
             // Tell the host that we're joining and to spawn our character for everyone.
             PlayerSpawnPacket spawnClientPlayer = new PlayerSpawnPacket(SteamClient.Name);
             //BetonMultiplayerMod.TestNetwork.SendPacketToSocketServer(spawnClientPlayer);
