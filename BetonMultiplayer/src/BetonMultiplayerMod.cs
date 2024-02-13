@@ -11,11 +11,13 @@ namespace BetonMultiplayer
     public class BetonMultiplayerMod : MelonMod
     {
         public static BetonNetwork Network;
-        //public static BetonNetwork TestNetwork;
         private bool drawMultiplayerMenu = false;
         private string ipAddress = "127.0.0.1";
         private string port = "8211";
-        private string color = "1.0,1.0,1.0";
+        private string color = "1,1,1";
+
+        private Vector3 lastPosition;
+        private Quaternion lastRotation;
 
         public static List<Player> players = new List<Player>();
 
@@ -37,10 +39,11 @@ namespace BetonMultiplayer
         public override void OnInitializeMelon()
         {
             Network = new BetonNetwork();
-            //TestNetwork = new BetonNetwork();
             ServerEvents.AddPacketListeners();
             ClientEvents.AddPacketListeners();
             MelonEvents.OnGUI.Subscribe(DrawMenu);
+
+            //TestNetworks.Init();
         }
 
         private (NetAddress ip, ushort port) verifyAddress()
@@ -111,7 +114,7 @@ namespace BetonMultiplayer
                         if (ipAddress.Equals("Invalid") || port.Equals("Invalid"))
                             return;
                         Network.Host(tuple.port);
-                        //TestNetwork.Connect(tuple.ip);
+                        //TestNetworks.Join();
                     }
 
                     if (GUI.Button(new Rect(5, 89, 140, 25), "Connect"))
@@ -134,14 +137,15 @@ namespace BetonMultiplayer
 
             color = GUI.TextField(new Rect(5, 116, 140, 25), color);
             UnityEngine.Color? col = MiscUtil.floatStringToColor(color);
-            if (col.HasValue)
+            UnityEngine.Color bodyColor = gameModeManager.player.GetComponentInChildren<Light>().color;
+            if (col.HasValue && col != bodyColor)
             {
                 gameModeManager.player.GetComponentInChildren<Light>().color = col.Value;
                 PlayerColorPacket playerColorPacket = new PlayerColorPacket(new Player(SteamClient.Name), col.Value);
                 
                 if(Network.host)
                 {
-                    Network.ServerBroadcastPacket(playerColorPacket, 99999999);
+                    Network.ServerBroadcastPacket(playerColorPacket, 0);
                 }
                 else
                 {
@@ -173,29 +177,38 @@ namespace BetonMultiplayer
             }*/
 
             Network.Update();
-            //TestNetwork.Update();
+            //TestNetworks.Update();
         }
 
         public override void OnFixedUpdate()
         {
-            PlayerMovePacket playerMovePacket = new PlayerMovePacket(new Player(SteamClient.Name), gameModeManager.player.transform);
+            Transform playerMove = gameModeManager.player.transform;
 
-            // SERVER-SIDE
-            if (Network.host)
+            // Player has moved.
+            if (lastPosition == null || !playerMove.position.Equals(lastPosition) || !playerMove.rotation.Equals(lastRotation))
             {
-                // TODO Sender does not matter here.
-                // We need to tell the clients that the host is moving.
-                uint serverIdentity = 9999999;
-                Network.ServerBroadcastPacket(playerMovePacket, serverIdentity);
-            }
-            // CLIENT-SIDE
-            else
-            {
-                // If connected.
-                if (Network.Client != null)
+                PlayerMovePacket playerMovePacket = new PlayerMovePacket(new Player(SteamClient.Name), playerMove);
+
+                // SERVER-SIDE
+                if (Network.host)
                 {
-                    Network.SendPacketToSocketServer(playerMovePacket);
+                    // TODO Sender does not matter here.
+                    // We need to tell the clients that the host is moving.
+                    uint serverIdentity = 0;
+                    Network.ServerBroadcastPacket(playerMovePacket, serverIdentity);
                 }
+                // CLIENT-SIDE
+                else
+                {
+                    // If connected.
+                    if (Network.Client != null)
+                    {
+                        Network.SendPacketToSocketServer(playerMovePacket);
+                    }
+                }
+
+                lastPosition = playerMove.position;
+                lastRotation = playerMove.rotation;
             }
         }
     }

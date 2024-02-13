@@ -21,7 +21,7 @@ namespace BetonMultiplayer
                 Player player = new Player(playerSpawnPacket.playerName);
                 BetonMultiplayerMod.players.Add(player);
                 player.Init();
-                Debug.Log("Added Player! " + player.name);
+                Debug.Log("CLIENT EVENTS: Added Player! " + player.name);
             }
         }
 
@@ -32,6 +32,7 @@ namespace BetonMultiplayer
                 if (playerColorPacket.player != null)
                 {
                     playerColorPacket.player.body.GetComponentInChildren<Light>().color = playerColorPacket.color;
+                    playerColorPacket.player.body.GetComponent<MeshRenderer>().material.color = playerColorPacket.color;
                 }
             }
         }
@@ -40,6 +41,7 @@ namespace BetonMultiplayer
         {
             BetonMultiplayerMod.Network.ClientBus.Register(PacketType.PlayerSpawnPacket, ProcessAddGhost);
             BetonMultiplayerMod.Network.ClientBus.Register(PacketType.PlayerMovePacket, ProcessMoveGhost);
+            BetonMultiplayerMod.Network.ClientBus.Register(PacketType.PlayerColorPacket, ProcessChangeColor);
         }
 
         public static void OnJoin(ConnectionInfo info)
@@ -47,7 +49,6 @@ namespace BetonMultiplayer
             Debug.Log("Client-OnJoin-" + SteamClient.Name);
             // Tell the host that we're joining and to spawn our character for everyone.
             PlayerSpawnPacket spawnClientPlayer = new PlayerSpawnPacket(SteamClient.Name);
-            //BetonMultiplayerMod.TestNetwork.SendPacketToSocketServer(spawnClientPlayer);
             BetonMultiplayerMod.Network.SendPacketToSocketServer(spawnClientPlayer);
         }
 
