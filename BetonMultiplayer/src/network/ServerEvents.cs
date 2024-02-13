@@ -1,6 +1,5 @@
 using Steamworks;
 using Steamworks.Data;
-using System.Net.Sockets;
 using UnityEngine;
 
 namespace BetonMultiplayer
@@ -22,7 +21,7 @@ namespace BetonMultiplayer
                 Player player = new Player(playerSpawnPacket.playerName, sender);
                 BetonMultiplayerMod.players.Add(player);
                 player.Init();
-                Debug.Log("Added Player! " + player.name);
+                Debug.Log("SERVER EVENTS: Added Player! " + player.name);
             }
         }
 
@@ -33,6 +32,7 @@ namespace BetonMultiplayer
                 if (playerColorPacket.player != null)
                 {
                     playerColorPacket.player.body.GetComponentInChildren<Light>().color = playerColorPacket.color;
+                    playerColorPacket.player.body.GetComponent<MeshRenderer>().material.color = playerColorPacket.color;
                 }
             }
         }
@@ -41,12 +41,22 @@ namespace BetonMultiplayer
         {
             BetonMultiplayerMod.Network.ServerBus.Register(PacketType.PlayerSpawnPacket, ProcessAddGhost);
             BetonMultiplayerMod.Network.ServerBus.Register(PacketType.PlayerMovePacket, ProcessMoveGhost);
+            BetonMultiplayerMod.Network.ServerBus.Register(PacketType.PlayerColorPacket, ProcessChangeColor);
         }
 
         public static void OnJoin(Connection connection)
         {
             Debug.Log("Server-OnJoin");
-            // Tell the client that's joining that the host player exists.
+
+            // Tell the client that's joining all the players that are currently online
+            foreach(Player player in BetonMultiplayerMod.players)
+            {
+                if (connection.Id == player.connectionId)
+                    continue;
+                PlayerSpawnPacket spawnClientPlayer = new PlayerSpawnPacket(player.name);
+                BetonMultiplayerMod.Network.SendPacketToConnection(spawnClientPlayer, connection);
+            }
+
             PlayerSpawnPacket spawnHostPlayer = new PlayerSpawnPacket(SteamClient.Name);
             BetonMultiplayerMod.Network.SendPacketToConnection(spawnHostPlayer, connection);
         }

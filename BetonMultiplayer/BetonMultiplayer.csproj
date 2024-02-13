@@ -400,6 +400,7 @@
     <Compile Include="src\packets\PlayerSpawnPacket.cs" />
     <Compile Include="src\packets\IReadablePacket.cs" />
     <Compile Include="src\Player.cs" />
+    <Compile Include="src\TestNetworks.cs" />
     <Compile Include="src\util\MiscUtil.cs" />
     <Compile Include="src\util\NetworkUtil.cs" />
     <Compile Include="src\util\PacketUtil.cs" />

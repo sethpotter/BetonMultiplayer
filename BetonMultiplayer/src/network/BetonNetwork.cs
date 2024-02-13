@@ -18,27 +18,29 @@ namespace BetonMultiplayer
 
         public override void OnConnected(Connection connection, ConnectionInfo data)
         {
-            base.OnConnected(connection, data);
             Debug.Log($"Server: Joined {data.Identity}");
             ServerEvents.OnJoin(connection);
+
+            // Tell the client they've connected.
+            base.OnConnected(connection, data);
         }
 
         public override void OnDisconnected(Connection connection, ConnectionInfo data)
         {
             base.OnDisconnected(connection, data);
             Debug.Log($"Server: Disconnected {data.Identity}");
-            ServerEvents.OnDisconnect(connection);
+            //ServerEvents.OnDisconnect(connection);
         }
 
         public override void OnMessage(Connection connection, NetIdentity identity, IntPtr data, int size, long messageNum, long recvTime, int channel)
         {
-            Debug.Log($"Server: Got Message from {identity}!");
-
             byte[] dataBytes = new byte[size];
             Marshal.Copy(data, dataBytes, 0, size);
             byte[] type = dataBytes.Take(4).ToArray();
             PacketType packetType = (PacketType) NetworkUtil.DecodeBytesToInt(type);
             Packet packet = Packets.CreatePacket(packetType, dataBytes.Skip(4).ToArray());
+
+            Debug.Log($"Server: Got Message - {identity} - " + packetType);
 
             BetonMultiplayerMod.Network.ServerBus.ProcessPacket(connection.Id, packet);
             BetonMultiplayerMod.Network.ServerBroadcastPacket(packet, connection.Id);
@@ -56,42 +58,35 @@ namespace BetonMultiplayer
 
         public override void OnConnected(ConnectionInfo info)
         {
-            base.OnConnected(info);
             Debug.Log("Client: Connected");
             ClientEvents.OnJoin(info);
+            base.OnConnected(info);
         }
 
         public override void OnDisconnected(ConnectionInfo info)
         {
             base.OnDisconnected(info);
             Debug.Log("Client: Disconnected");
-            BetonMultiplayerMod.Network.Close();
             ClientEvents.OnDisconnect();
         }
 
         public override void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)
         {
-            Debug.Log("Client: Got Message");
-
             byte[] dataBytes = new byte[size];
             Marshal.Copy(data, dataBytes, 0, size);
             byte[] type = dataBytes.Take(4).ToArray();
             PacketType packetType = (PacketType) NetworkUtil.DecodeBytesToInt(type);
             Packet packet = Packets.CreatePacket(packetType, dataBytes.Skip(4).ToArray());
 
-            // TODO ClientBus needs to be different from ServerBus.
-            uint serverIdentity = 9999999;
+            Debug.Log("Client: Got Message - " + packetType);
+
+            uint serverIdentity = 0;
             BetonMultiplayerMod.Network.ClientBus.ProcessPacket(serverIdentity, packet);
         }
     }
 
     public class BetonNetwork
     {
-        public enum ConnectionStatus {
-            Connecting = 0,
-            Connected = 1
-        }
-
         public SteamSocketManager Server;
         public SteamConnectionManager Client;
         public PacketBus ServerBus;
@@ -129,6 +124,7 @@ namespace BetonMultiplayer
                 Server?.Close();
                 Client?.Close();
                 host = false;
+                Server = null;
                 Client = null;
                 Debug.Log("Server & Client: Closed.");
             }
@@ -169,14 +165,13 @@ namespace BetonMultiplayer
         // SERVER-SIDE
         public void ServerBroadcastPacket(Packet packet, uint sender)
         {
+            packet.Decode();
             Connection[] connections = Server.Connected.ToArray();
-            for (int i = 0; i < connections.Length; i++)
+            foreach (Connection conn in connections)
             {
-                Connection connection = connections[i];
-                if (connection.Id != sender)
-                {
-                    SendPacketToConnection(packet, connection);
-                }
+                if (conn.Id == sender)
+                    continue;
+                SendPacketToConnection(packet, conn);
             }
         }
 
@@ -194,9 +189,9 @@ namespace BetonMultiplayer
             int sizeOfMessage = bytes.Length;
             IntPtr intPtrMessage = Marshal.AllocHGlobal(sizeOfMessage);
             Marshal.Copy(bytes, 0, intPtrMessage, sizeOfMessage);
-            Result success = connection.SendMessage(intPtrMessage, sizeOfMessage, SendType.Reliable);
+            Result result = connection.SendMessage(intPtrMessage, sizeOfMessage, SendType.Reliable);
             Marshal.FreeHGlobal(intPtrMessage);
-            return success;
+            return result;
         }
 
         // CLIENT-SIDE
