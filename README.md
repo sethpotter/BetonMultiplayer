@@ -27,6 +27,8 @@ To join someone change the address to your friends IP address then click Connect
 If you are having trouble, it may be because a firewall issue between the host and client or the host may have issues with portforwarding. 
 Be sure the port you are using is portforwarded properly! If you are using Hamachi this is not a concern.
 
+If you cannot see someone or are experiencing desync issues. The client should **press the G key** to resync with the host.
+
 ![In-game view](showcase/screenshot.jpg)
 
 If you encounter any problems or have suggestions feel free to let me know at my discord **@dc_thunder** or in the issues section.
