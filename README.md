@@ -29,8 +29,6 @@ Be sure the port you are using is portforwarded properly! If you are using Hamac
 
 If you cannot see someone or are experiencing desync issues. The client should **press the G key** to resync with the host.
 
-![In-game view](showcase/screenshot.jpg)
-
-If you encounter any problems or have suggestions feel free to let me know at my discord **@dc_thunder** or in the issues section.
+If you encounter any problems or have suggestions feel free to let me know in the issues section.
 
 Good luck and have fun!
