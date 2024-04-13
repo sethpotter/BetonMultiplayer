@@ -170,6 +170,12 @@ namespace BetonMultiplayer
                 drawMultiplayerMenu = !drawMultiplayerMenu;
             }
 
+            if (kb.gKey.wasReleasedThisFrame)
+            {
+                PlayerSpawnPacket clientPlayer = new PlayerSpawnPacket(SteamClient.Name);
+                Network.SendPacketToSocketServer(clientPlayer);
+            }
+
             /*if (kb.tKey.wasPressedThisFrame)
             {
                 PlayerMovePacket playerMovePacket = new PlayerMovePacket(new Player(SteamClient.Name), gameModeManager.player.transform);
